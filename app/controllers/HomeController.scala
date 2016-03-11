@@ -3,6 +3,7 @@ package controllers
 import javax.inject._
 import play.api._
 import play.api.mvc._
+import play.api.mvc.Security.AuthenticatedBuilder
 
 /**
  * This controller creates an `Action` to handle HTTP requests to the
@@ -18,7 +19,7 @@ class HomeController @Inject() extends Controller {
    * will be called when the application receives a `GET` request with
    * a path of `/`.
    */
-  def index = Action {
+  def index = Authenticated {
     homeLogger.debug("test")
     homeLogger.info("info log")
     homeLogger.warn("warn log")
@@ -28,3 +29,9 @@ class HomeController @Inject() extends Controller {
   }
 
 }
+
+object Authenticated extends AuthenticatedBuilder[String] (
+  request => {
+    request.headers.get("api-key")
+  }
+)
