@@ -11,6 +11,7 @@ import play.api.mvc._
 @Singleton
 class HomeController @Inject() extends Controller {
 
+  val homeLogger = Logger(this.getClass)
   /**
    * Create an Action to render an HTML page with a welcome message.
    * The configuration in the `routes` file means that this method
@@ -18,6 +19,12 @@ class HomeController @Inject() extends Controller {
    * a path of `/`.
    */
   def index = Action {
+    homeLogger.debug("test")
+    homeLogger.info("info log")
+    homeLogger.info("info log 2")
+    homeLogger.warn("warn log")
+    homeLogger.error("error log")
+
     Ok("Welcome to the Time Advisor Research and Development Institute of Science")
   }
 
