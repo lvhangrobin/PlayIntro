@@ -5,6 +5,7 @@ import org.joda.time.format.DateTimeFormat
 import javax.inject._
 import play.api._
 import play.api.mvc._
+import play.api.{Configuration}
 
 import javax.swing.text.DateFormatter
 
@@ -13,19 +14,22 @@ import javax.swing.text.DateFormatter
  * application's currency page.
  */
 @Singleton
-class CurrencyController @Inject() extends Controller {
+class CurrencyController @Inject() (configuration: Configuration) extends Controller {
 
   val currencyLogger = Logger(this.getClass)
   val dateFormatter = DateTimeFormat.forPattern("yyyy-MM-dd")
+  val initialDate = dateFormatter.parseLocalDate(configuration.getString("play.currency.earliestDate").get)
+
   /**
    * Display the date given
    */
   def date(dateInput: String) = Action {
 
     try {
+//      val initialDate: LocalDate = new LocalDate()
       val localDate: LocalDate = dateFormatter.parseLocalDate(dateInput)
       val currentDate: LocalDate = LocalDate.now()
-      val initialDate: LocalDate = new LocalDate(2000, 1, 1)
+
       if (! localDate.isAfter(initialDate) && localDate.isBefore(currentDate)){
         currencyLogger.error(s"requested $dateInput is not in range")
         BadRequest(s"requested $dateInput is not in range")
