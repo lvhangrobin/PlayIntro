@@ -23,7 +23,7 @@ class CurrencyController @Inject() (configuration: Configuration) extends Contro
   /**
    * Display the date given
    */
-  def date(dateInput: String) = Action {
+  def date(dateInput: String) = Authenticated {
 
     try {
 //      val initialDate: LocalDate = new LocalDate()

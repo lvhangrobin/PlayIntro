@@ -15,7 +15,7 @@ class RandomController @Inject()(configuration: Configuration) extends Controlle
   val FUTURE_YEAR_IN_SECONDS = new DateTime().plusYears(20).getMillis / 1000
   val randomLogger = Logger(this.getClass)
 
-  def index() = Action {
+  def index() = Authenticated {
     randomLogger.debug(s"${FUTURE_YEAR_IN_SECONDS.toInt}")
     val randomDate: LocalDate = new LocalDate(new Random().nextInt(FUTURE_YEAR_IN_SECONDS.toInt).toLong * 1000)
     val dateInput: String = dateFormatter.print(randomDate)

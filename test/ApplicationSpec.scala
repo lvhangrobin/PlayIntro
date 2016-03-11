@@ -31,9 +31,11 @@ class ApplicationSpec extends PlaySpec with OneAppPerTest {
   }
 
   "CurrencyContoller" should {
+
+
     "render the date given" in {
       val validDate = "2016-03-11"
-      val currencyDate = route(app, FakeRequest(GET, s"/currency/$validDate")).get
+      val currencyDate = route(app, fakeGetRequestWithAuth(s"/currency/$validDate")).get
 
       status(currencyDate) mustBe OK
       contentType(currencyDate) mustBe Some("text/plain")
@@ -42,7 +44,7 @@ class ApplicationSpec extends PlaySpec with OneAppPerTest {
 
     "render bad request when invalid date is given" in {
       val invalidDate = "2016-33-11"
-      val currencyDate = route(app, FakeRequest(GET, s"/currency/$invalidDate")).get
+      val currencyDate = route(app, fakeGetRequestWithAuth(s"/currency/$invalidDate")).get
 
       status(currencyDate) mustBe BAD_REQUEST
       contentType(currencyDate) mustBe Some("text/plain")
@@ -51,7 +53,7 @@ class ApplicationSpec extends PlaySpec with OneAppPerTest {
 
     "render bad request when date is not in range" in {
       val outOfRangeDate = "2005-11-11"
-      val currencyDate = route(app, FakeRequest(GET, s"/currency/$outOfRangeDate")).get
+      val currencyDate = route(app, fakeGetRequestWithAuth(s"/currency/$outOfRangeDate")).get
 
       status(currencyDate) mustBe BAD_REQUEST
       contentType(currencyDate) mustBe Some("text/plain")
@@ -71,12 +73,23 @@ class ApplicationSpec extends PlaySpec with OneAppPerTest {
   "RandomController" should {
 
     "redirect to random currency date" in {
-      val randomRedirect = route(app, FakeRequest(GET, s"/random")).get
+      val randomRedirect = route(app, fakeGetRequestWithAuth(s"/random")).get
 
       status(randomRedirect) mustBe SEE_OTHER
       contentType(randomRedirect) mustBe None
       header("Location", randomRedirect).get must startWith ("/currency/")
     }
-  }
 
+    "redirect to unauthorized if with no auth" in {
+      val randomRedirect = route(app, FakeRequest(GET, s"/random")).get
+
+      status(randomRedirect) mustBe UNAUTHORIZED
+    }
+
+    "redirect to unauthorized if authentication failed" in {
+      val randomRedirect = route(app, fakeGetRequestWithInvalidAuth(s"/random")).get
+
+      status(randomRedirect) mustBe UNAUTHORIZED
+    }
+  }
 }
