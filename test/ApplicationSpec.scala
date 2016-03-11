@@ -26,7 +26,6 @@ class ApplicationSpec extends PlaySpec with OneAppPerTest {
 
       status(home) mustBe OK
       contentType(home) mustBe Some("text/plain")
-      contentAsString(home) mustBe homePageResponse
     }
 
   }
@@ -67,7 +66,17 @@ class ApplicationSpec extends PlaySpec with OneAppPerTest {
       contentAsString(route(app, FakeRequest(GET, "/count")).get) mustBe "1"
       contentAsString(route(app, FakeRequest(GET, "/count")).get) mustBe "2"
     }
+  }
 
+  "RandomController" should {
+
+    "redirect to random currency date" in {
+      val randomRedirect = route(app, FakeRequest(GET, s"/random")).get
+
+      status(randomRedirect) mustBe SEE_OTHER
+      contentType(randomRedirect) mustBe None
+      header("Location", randomRedirect).get must startWith ("/currency/")
+    }
   }
 
 }
