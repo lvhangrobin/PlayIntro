@@ -51,7 +51,7 @@ class ApplicationSpec extends PlaySpec with OneAppPerTest {
     }
 
     "render bad request when date is not in range" in {
-      val outOfRangeDate = "1999-11-11"
+      val outOfRangeDate = "2005-11-11"
       val currencyDate = route(app, FakeRequest(GET, s"/currency/$outOfRangeDate")).get
 
       status(currencyDate) mustBe BAD_REQUEST
