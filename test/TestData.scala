@@ -2,5 +2,7 @@
 
 object TestData {
   val homePageResponse = "Welcome to the Time Advisor Research and Development Institute of Science"
-  val currencyDateResponse20160311 = "TARDIS currency advisor for date 2016-03-11"
+  def currencyDateResponse(date: String) = s"TARDIS currency advisor for date $date"
+  def invalidDateResponse(date: String) = s"$date is in wrong format"
+  def outOfRangeDateResponse(date: String) = s"requested $date is not in range"
 }

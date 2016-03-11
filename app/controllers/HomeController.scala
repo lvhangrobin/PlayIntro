@@ -21,7 +21,6 @@ class HomeController @Inject() extends Controller {
   def index = Action {
     homeLogger.debug("test")
     homeLogger.info("info log")
-    homeLogger.info("info log 2")
     homeLogger.warn("warn log")
     homeLogger.error("error log")
 

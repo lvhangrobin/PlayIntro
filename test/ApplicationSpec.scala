@@ -33,11 +33,30 @@ class ApplicationSpec extends PlaySpec with OneAppPerTest {
 
   "CurrencyContoller" should {
     "render the date given" in {
-      val currencyDate = route(app, FakeRequest(GET, "/currency/2016-03-11")).get
+      val validDate = "2016-03-11"
+      val currencyDate = route(app, FakeRequest(GET, s"/currency/$validDate")).get
 
       status(currencyDate) mustBe OK
       contentType(currencyDate) mustBe Some("text/plain")
-      contentAsString(currencyDate) mustBe currencyDateResponse20160311
+      contentAsString(currencyDate) mustBe currencyDateResponse(validDate)
+    }
+
+    "render bad request when invalid date is given" in {
+      val invalidDate = "2016-33-11"
+      val currencyDate = route(app, FakeRequest(GET, s"/currency/$invalidDate")).get
+
+      status(currencyDate) mustBe BAD_REQUEST
+      contentType(currencyDate) mustBe Some("text/plain")
+      contentAsString(currencyDate) mustBe invalidDateResponse(invalidDate)
+    }
+
+    "render bad request when date is not in range" in {
+      val outOfRangeDate = "1999-11-11"
+      val currencyDate = route(app, FakeRequest(GET, s"/currency/$outOfRangeDate")).get
+
+      status(currencyDate) mustBe BAD_REQUEST
+      contentType(currencyDate) mustBe Some("text/plain")
+      contentAsString(currencyDate) mustBe outOfRangeDateResponse(outOfRangeDate)
     }
   }
 
