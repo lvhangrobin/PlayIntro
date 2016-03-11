@@ -31,6 +31,16 @@ class ApplicationSpec extends PlaySpec with OneAppPerTest {
 
   }
 
+  "CurrencyContoller" should {
+    "render the date given" in {
+      val currencyDate = route(app, FakeRequest(GET, "/currency/2016-03-11")).get
+
+      status(currencyDate) mustBe OK
+      contentType(currencyDate) mustBe Some("text/plain")
+      contentAsString(currencyDate) mustBe currencyDateResponse20160311
+    }
+  }
+
   "CountController" should {
 
     "return an increasing count" in {
