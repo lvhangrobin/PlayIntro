@@ -6,9 +6,9 @@ import play.api.{Configuration, Logger}
 import play.api.mvc.{Action, Controller}
 
 import scala.util.Random
-import javax.inject.Inject
+import javax.inject.{Singleton, Inject}
 
-
+@Singleton
 class RandomController @Inject()(configuration: Configuration) extends Controller {
 
   val dateFormatter = DateTimeFormat.forPattern("yyyy-MM-dd")
@@ -20,7 +20,7 @@ class RandomController @Inject()(configuration: Configuration) extends Controlle
     val randomDate: LocalDate = new LocalDate(new Random().nextInt(FUTURE_YEAR_IN_SECONDS.toInt).toLong * 1000)
     val dateInput: String = dateFormatter.print(randomDate)
 
-    Redirect(s"/currency/$dateInput")
+    Redirect(routes.CurrencyController.date(dateInput))
   }
 
 }
