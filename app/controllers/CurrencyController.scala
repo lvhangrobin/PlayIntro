@@ -5,7 +5,7 @@ import org.joda.time.format.DateTimeFormat
 import javax.inject._
 import play.api._
 import play.api.mvc._
-import play.api.{Configuration}
+import play.api.Configuration
 
 import javax.swing.text.DateFormatter
 
