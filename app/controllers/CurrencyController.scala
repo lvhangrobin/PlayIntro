@@ -35,7 +35,7 @@ class CurrencyController @Inject() (configuration: Configuration, httpClient: Ht
         Future.successful(BadRequest(s"requested $dateInput is not in range"))
       } else {
         getMaxProfit(dateInput).map { currency =>
-          Ok(s"If you go back to $dateInput you should buy $currency and sell them back when you come back")
+          Ok(f"If you go back to $dateInput you should buy ${currency._1} and sell them back when you come back with a profit of ${currency._2}%.2f")
         }
       }
     } catch {
@@ -49,7 +49,7 @@ class CurrencyController @Inject() (configuration: Configuration, httpClient: Ht
     httpClient.get(url).map(r => (r \ "rates").as[Map[String, Double]])
   }
 
-  private def getMaxProfit(past: String, today: String = "latest"): Future[String] = {
+  private def getMaxProfit(past: String, today: String = "latest"): Future[(String, Double)] = {
     val pastRate = getFromFixIO(past)
     val todayRate = getFromFixIO(today)
 
@@ -59,9 +59,14 @@ class CurrencyController @Inject() (configuration: Configuration, httpClient: Ht
     } yield {
       val pastInverse = pastMapping.mapValues(1 / _)
       val todayInverse = todayMapping.mapValues(1 / _)
-      pastInverse.keySet.intersect(todayInverse.keySet).toList.map{ currency =>
+      val mostProfitableCurrencyAndProfit = pastInverse.keySet.intersect(todayInverse.keySet).toList.map{ currency =>
         currency -> (todayInverse(currency) - pastInverse(currency))
-      }.sortBy(_._2).last._1
+      }.sortBy(_._2).last
+
+      (
+        mostProfitableCurrencyAndProfit._1,
+        todayInverse(mostProfitableCurrencyAndProfit._1) / pastInverse(mostProfitableCurrencyAndProfit._1) - 1
+      )
     }
   }
 }
