@@ -75,7 +75,7 @@ class ApplicationSpec extends PlaySpec with OneAppPerTest {
 
       status(currencyDate) mustBe BAD_REQUEST
       contentType(currencyDate) mustBe Some("text/plain")
-      contentAsString(currencyDate) mustBe invalidDateResponse(invalidDate)
+      contentAsString(currencyDate) must startWith (invalidDateResponse(invalidDate))
     }
 
     "render bad request when date is not in range" in {

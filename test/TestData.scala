@@ -8,7 +8,7 @@ object TestData {
   val invalidApiKey = "!bcdefghijklmnopqrstuvwxyz123456"
 
   def currencyDateResponse(date: String) = s"TARDIS currency advisor for date $date"
-  def invalidDateResponse(date: String) = s"$date is in wrong format"
+  def invalidDateResponse(date: String) = s"""Cannot parse "$date"""
   def outOfRangeDateResponse(date: String) = s"requested $date is not in range"
   def fakeGetRequestWithAuth(url: String) = FakeRequest(GET, url).withHeaders("api-key" -> validApiKey)
   def fakeGetRequestWithAuthForCache(url: String) = FakeRequest(GET, url).withHeaders("api-key" -> validApiKeyForCache)
