@@ -30,7 +30,7 @@ class ThrottlingFilter @Inject()(
   override def apply(nextFilter: RequestHeader => Future[Result])
            (requestHeader: RequestHeader): Future[Result] = {
 
-    val maxRequests = configuration.getInt("play.application.maxRequests").getOrElse(2)
+    val maxRequests = configuration.getInt("play.application.maxRequests").getOrElse(3)
     val apiKey: String = requestHeader.headers.get("api-key").getOrElse(requestHeader.remoteAddress)
     val now = DateTime.now()
 
@@ -38,9 +38,7 @@ class ThrottlingFilter @Inject()(
     val newCachedResult = cachedResult.map(_.dropWhile(_.plusMinutes(1).isBefore(now)) :+ now).getOrElse(Seq(now))
     throttlingCache.set(apiKey, newCachedResult, 1.minutes)
 
-    val isThrottled = cachedResult.filterNot { times =>
-      times.length >= maxRequests - 1 && times.head.plusMinutes(1).isBefore(now)
-    }.isDefined
+    val isThrottled = newCachedResult.length >= maxRequests - 1
 
     if (isThrottled)
       Future.successful(Results.TooManyRequests)
