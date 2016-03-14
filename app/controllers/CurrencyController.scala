@@ -4,7 +4,7 @@ import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
 import play.api.{Configuration, _}
 import play.api.mvc._
-import services.HttpClient
+import services.Client
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -15,7 +15,7 @@ import javax.inject.{Inject, _}
  * application's currency page.
  */
 @Singleton
-class CurrencyController @Inject() (configuration: Configuration, httpClient: HttpClient) extends Controller {
+class CurrencyController @Inject() (configuration: Configuration, httpClient: Client) extends Controller {
 
   val currencyLogger = Logger(this.getClass)
   val dateFormatter = DateTimeFormat.forPattern("yyyy-MM-dd")

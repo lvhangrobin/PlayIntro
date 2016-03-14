@@ -2,7 +2,7 @@ import com.google.inject.AbstractModule
 import filters.ThrottlingFilter
 import java.time.Clock
 
-import services.{HttpClient, ApplicationTimer, AtomicCounter, Counter}
+import services.{Client, HttpClient, ApplicationTimer, AtomicCounter, Counter}
 
 /**
  * This class is a Guice module that tells Guice how to bind several
@@ -25,7 +25,7 @@ class Module extends AbstractModule {
     // Set AtomicCounter as the implementation for Counter.
     bind(classOf[Counter]).to(classOf[AtomicCounter])
 
-    bind(classOf[HttpClient])
+    bind(classOf[Client]).to(classOf[HttpClient])
 
 //    bind(classOf[ThrottlingFilter])
   }

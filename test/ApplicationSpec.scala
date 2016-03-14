@@ -13,7 +13,7 @@ import play.api.test.Helpers._
 import org.scalatestplus.play._
 
 import TestData._
-import services.HttpClient
+import services._
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -49,7 +49,7 @@ class ApplicationSpec extends PlaySpec with OneAppPerTest {
 //    "return the currency which has the maximum profit" in {
 //
 //      val application = new GuiceApplicationBuilder()
-//        .overrides(bind[HttpClient].to[MockHttpClient])
+//        .overrides(bind[Client].to[MockHttpClient])
 //        .build
 //
 //      val response = route(application, fakeGetRequestWithAuth(s"/currency/2011-01-01")).get
