@@ -20,11 +20,12 @@ class CurrencyController @Inject() (configuration: Configuration, httpClient: Cl
   val currencyLogger = Logger(this.getClass)
   val dateFormatter = DateTimeFormat.forPattern("yyyy-MM-dd")
   val initialDate = dateFormatter.parseLocalDate(configuration.getString("play.currency.earliestDate").get)
+  val forecastApiKey = configuration.getString("play.forecast.api_key").get
 
   /**
    * Display the date given
    */
-  def date(dateInput: String) = Authenticated.async {
+  def date(dateInput: String, latOpt: Option[Double], longOpt: Option[Double]) = Authenticated.async {
 
     try {
       val localDate: LocalDate = dateFormatter.parseLocalDate(dateInput)
@@ -34,12 +35,19 @@ class CurrencyController @Inject() (configuration: Configuration, httpClient: Cl
         currencyLogger.error(s"requested $dateInput is not in range")
         Future.successful(BadRequest(s"requested $dateInput is not in range"))
       } else {
-        getMaxProfit(dateInput).map { currency =>
-          Ok(f"If you go back to $dateInput you should buy ${currency._1} and sell them back when you come back with a profit of ${currency._2}%.2f")
-        }
+        val (lat, long) = getLatAndLong(latOpt, longOpt)
+
+        for {
+          (currency, profit)<- getMaxProfit(dateInput)
+          recommendation <- getFromForecastIO(lat, long, localDate).map{case (temp,icon) => getRecommendation(temp, icon)}
+        } yield Ok(
+          f"""If you go back to $dateInput you should buy $currency
+             |and sell them back when you come back with a profit of $profit%.2f.
+             |Don't forget to bring your $recommendation""".stripMargin)
+
       }
     } catch {
-      case e: IllegalArgumentException => Future.successful(BadRequest(s"$dateInput is in wrong format"))
+      case e: IllegalArgumentException => Future.successful(BadRequest(e.getMessage))
     }
 
   }
@@ -67,6 +75,30 @@ class CurrencyController @Inject() (configuration: Configuration, httpClient: Cl
         mostProfitableCurrencyAndProfit._1,
         todayInverse(mostProfitableCurrencyAndProfit._1) / pastInverse(mostProfitableCurrencyAndProfit._1) - 1
       )
+    }
+  }
+
+  private def getFromForecastIO(lat: Double, long: Double, localDate: LocalDate): Future[(Double, String)] = {
+    val formattedTime = s"${dateFormatter.print(localDate)}T00:00:00"
+    val url = s"https://api.forecast.io/forecast/$forecastApiKey/$lat,$long,$formattedTime?units=si"
+    httpClient.get(url).map(r =>
+      (r \ "currently" \ "temperature").as[Double] -> (r \ "currently" \ "icon").as[String])
+  }
+
+  private def getRecommendation(temperature: Double, weather: String): String = {
+    (temperature, weather) match {
+      case (_, "rain") => "Umbrella"
+      case (x, _) if x > 20 => "Shorts"
+      case (x, _) if x <= 20 && x >= 10 => "Sweater"
+      case (x, _) if x < 10 => "Winter Coat"
+    }
+  }
+
+  private def getLatAndLong(lat: Option[Double], long: Option[Double]): (Double, Double) = {
+    (lat, long) match {
+      case (Some(x), Some(y)) if x >= -90 && x <= 90 && y >= -180 && y <= 180 => x -> y
+      case (None, None) => 49.26382D -> -123.104321D
+      case _ => throw new IllegalArgumentException("lat and long don't satisfy requirement")
     }
   }
 }

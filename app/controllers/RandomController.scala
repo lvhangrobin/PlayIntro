@@ -20,7 +20,7 @@ class RandomController @Inject()(configuration: Configuration) extends Controlle
     val randomDate: LocalDate = new LocalDate(new Random().nextInt(FUTURE_YEAR_IN_SECONDS.toInt).toLong * 1000)
     val dateInput: String = dateFormatter.print(randomDate)
 
-    Redirect(routes.CurrencyController.date(dateInput))
+    Redirect(routes.CurrencyController.date(dateInput, None, None))
   }
 
 }
