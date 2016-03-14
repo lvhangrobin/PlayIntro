@@ -13,7 +13,7 @@ GET     /message                    controllers.AsyncController.message
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
 # Current Advisor Date
-GET     /currency/:dateInput        controllers.CurrencyController.date(dateInput: String, lat: Option[Double], long: Option[Double])
+GET     /currency/:dateInput        controllers.CurrencyController.date(dateInput: String, coord: models.Coordinate)
 
 # random date
 GET     /random                     controllers.RandomController.index

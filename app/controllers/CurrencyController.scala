@@ -1,5 +1,6 @@
 package controllers
 
+import models.Coordinate
 import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
 import play.api.{Configuration, _}
@@ -25,7 +26,7 @@ class CurrencyController @Inject() (configuration: Configuration, httpClient: Cl
   /**
    * Display the date given
    */
-  def date(dateInput: String, latOpt: Option[Double], longOpt: Option[Double]) = Authenticated.async {
+  def date(dateInput: String, coord: Coordinate) = Authenticated.async {
 
     try {
       val localDate: LocalDate = dateFormatter.parseLocalDate(dateInput)
@@ -35,11 +36,10 @@ class CurrencyController @Inject() (configuration: Configuration, httpClient: Cl
         currencyLogger.error(s"requested $dateInput is not in range")
         Future.successful(BadRequest(s"requested $dateInput is not in range"))
       } else {
-        val (lat, long) = getLatAndLong(latOpt, longOpt)
 
         for {
           (currency, profit)<- getMaxProfit(dateInput)
-          recommendation <- getFromForecastIO(lat, long, localDate).map{case (temp,icon) => getRecommendation(temp, icon)}
+          recommendation <- getFromForecastIO(coord.lat, coord.long, localDate).map{case (temp,icon) => getRecommendation(temp, icon)}
         } yield Ok(
           f"""If you go back to $dateInput you should buy $currency
              |and sell them back when you come back with a profit of $profit%.2f.
@@ -49,7 +49,6 @@ class CurrencyController @Inject() (configuration: Configuration, httpClient: Cl
     } catch {
       case e: IllegalArgumentException => Future.successful(BadRequest(e.getMessage))
     }
-
   }
 
   private def getFromFixIO(date: String): Future[Map[String, Double]] = {
@@ -91,14 +90,6 @@ class CurrencyController @Inject() (configuration: Configuration, httpClient: Cl
       case (x, _) if x > 20 => "Shorts"
       case (x, _) if x <= 20 && x >= 10 => "Sweater"
       case (x, _) if x < 10 => "Winter Coat"
-    }
-  }
-
-  private def getLatAndLong(lat: Option[Double], long: Option[Double]): (Double, Double) = {
-    (lat, long) match {
-      case (Some(x), Some(y)) if x >= -90 && x <= 90 && y >= -180 && y <= 180 => x -> y
-      case (None, None) => 49.26382D -> -123.104321D
-      case _ => throw new IllegalArgumentException("lat and long don't satisfy requirement")
     }
   }
 }
