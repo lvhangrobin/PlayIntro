@@ -1,8 +1,22 @@
-import org.scalatestplus.play._
+
+import controllers.CurrencyController
+import filters.ThrottlingFilter
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.inject.bind
+import play.core.server.Server
+import play.api.{Configuration, Environment, Play}
+import play.api.routing.sird.{GET => RouteGet, _}
+import play.api.mvc._
 import play.api.test._
+import play.api.libs.json._
 import play.api.test.Helpers._
+import org.scalatestplus.play._
 
 import TestData._
+import services.HttpClient
+
+import scala.concurrent.Await
+import scala.concurrent.duration._
 
 /**
  * Add your spec here.
@@ -32,15 +46,15 @@ class ApplicationSpec extends PlaySpec with OneAppPerTest {
 
   "CurrencyContoller" should {
 
-
-    "render the date given" in {
-      val validDate = "2016-03-11"
-      val currencyDate = route(app, fakeGetRequestWithAuth(s"/currency/$validDate")).get
-
-      status(currencyDate) mustBe OK
-      contentType(currencyDate) mustBe Some("text/plain")
-      contentAsString(currencyDate) mustBe currencyDateResponse(validDate)
-    }
+//    "return the currency which has the maximum profit" in {
+//
+//      val application = new GuiceApplicationBuilder()
+//        .overrides(bind[HttpClient].to[MockHttpClient])
+//        .build
+//
+//      val response = route(application, fakeGetRequestWithAuth(s"/currency/2011-01-01")).get
+//      status(response) mustBe OK
+//    }
 
 //    "render throttling of the request" in {
 //      val validDate = "2016-03-11"
@@ -106,3 +120,5 @@ class ApplicationSpec extends PlaySpec with OneAppPerTest {
     }
   }
 }
+
+

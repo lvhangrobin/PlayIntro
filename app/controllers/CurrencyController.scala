@@ -2,25 +2,20 @@ package controllers
 
 import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
-import play.api.libs.json.JsValue
-import scala.concurrent.Future
-import javax.inject._
-import play.api._
+import play.api.{Configuration, _}
 import play.api.mvc._
-import play.api.libs.ws._
-import play.api.Configuration
+import services.HttpClient
 
-import javax.inject.Inject
-import scala.concurrent.Future
-import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+import javax.inject.{Inject, _}
 
 /**
  * This controller creates an `Action` to handle HTTP requests to the
  * application's currency page.
  */
 @Singleton
-class CurrencyController @Inject() (configuration: Configuration, ws: WSClient) extends Controller {
+class CurrencyController @Inject() (configuration: Configuration, httpClient: HttpClient) extends Controller {
 
   val currencyLogger = Logger(this.getClass)
   val dateFormatter = DateTimeFormat.forPattern("yyyy-MM-dd")
@@ -39,9 +34,8 @@ class CurrencyController @Inject() (configuration: Configuration, ws: WSClient) 
         currencyLogger.error(s"requested $dateInput is not in range")
         Future.successful(BadRequest(s"requested $dateInput is not in range"))
       } else {
-        getFromFixIO(dateInput).map { json =>
-          currencyLogger.info(s"the returned json is $json")
-          Ok(s"TARDIS currency advisor for date $dateInput")
+        getMaxProfit(dateInput).map { currency =>
+          Ok(s"If you go back to $dateInput you should buy $currency and sell them back when you come back")
         }
       }
     } catch {
@@ -50,8 +44,24 @@ class CurrencyController @Inject() (configuration: Configuration, ws: WSClient) 
 
   }
 
-  private def getFromFixIO(date: String): Future[JsValue] = {
+  private def getFromFixIO(date: String): Future[Map[String, Double]] = {
     val url = s"http://api.fixer.io/$date"
-    ws.url(url).get().map(_.json)
+    httpClient.get(url).map(r => (r \ "rates").as[Map[String, Double]])
+  }
+
+  private def getMaxProfit(past: String, today: String = "latest"): Future[String] = {
+    val pastRate = getFromFixIO(past)
+    val todayRate = getFromFixIO(today)
+
+    for {
+      pastMapping <- pastRate
+      todayMapping <- todayRate
+    } yield {
+      val pastInverse = pastMapping.mapValues(1 / _)
+      val todayInverse = todayMapping.mapValues(1 / _)
+      pastInverse.keySet.intersect(todayInverse.keySet).toList.map{ currency =>
+        currency -> (todayInverse(currency) - pastInverse(currency))
+      }.sortBy(_._2).last._1
+    }
   }
 }
