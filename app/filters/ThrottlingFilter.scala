@@ -26,7 +26,7 @@ class ThrottlingFilter @Inject()(
     exec: ExecutionContext,
     @NamedCache("throttling-cache") throttlingCache: CacheApi,
     configuration: Configuration) extends Filter {
-  
+
   override def apply(nextFilter: RequestHeader => Future[Result])
            (requestHeader: RequestHeader): Future[Result] = {
 
@@ -38,7 +38,7 @@ class ThrottlingFilter @Inject()(
     val newCachedResult = cachedResult.map(_.dropWhile(_.plusMinutes(1).isBefore(now)) :+ now).getOrElse(Seq(now))
     throttlingCache.set(apiKey, newCachedResult, 1.minutes)
 
-    val isThrottled = newCachedResult.length >= maxRequests - 1
+    val isThrottled = newCachedResult.length >= maxRequests
 
     if (isThrottled)
       Future.successful(Results.TooManyRequests)

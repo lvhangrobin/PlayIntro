@@ -42,6 +42,19 @@ class ApplicationSpec extends PlaySpec with OneAppPerTest {
       contentAsString(currencyDate) mustBe currencyDateResponse(validDate)
     }
 
+//    "render throttling of the request" in {
+//      val validDate = "2016-03-11"
+//
+//      for {
+//        n <- List(1, 2)
+//      } route(app, FakeRequest(GET, "/")).get
+//      // route(app, fakeGetRequestWithAuthForCache(s"/currency/$validDate")).get
+//
+////      val currencyDate = route(app, fakeGetRequestWithAuthForCache(s"/currency/$validDate")).get
+//      val currencyDate= route(app, FakeRequest(GET, "/")).get
+//      status(currencyDate) mustBe TOO_MANY_REQUESTS
+//    }
+
     "render bad request when invalid date is given" in {
       val invalidDate = "2016-33-11"
       val currencyDate = route(app, fakeGetRequestWithAuth(s"/currency/$invalidDate")).get
