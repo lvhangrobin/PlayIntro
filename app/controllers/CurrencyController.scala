@@ -66,14 +66,11 @@ class CurrencyController @Inject() (configuration: Configuration, httpClient: Cl
     } yield {
       val pastInverse = pastMapping.mapValues(1 / _)
       val todayInverse = todayMapping.mapValues(1 / _)
-      val mostProfitableCurrencyAndProfit = pastInverse.keySet.intersect(todayInverse.keySet).toList.map{ currency =>
+      val mostProfitableCurrency = pastInverse.keySet.intersect(todayInverse.keySet).toList.map{ currency =>
         currency -> (todayInverse(currency) - pastInverse(currency))
-      }.sortBy(_._2).last
+      }.sortBy(_._2).last._1
 
-      (
-        mostProfitableCurrencyAndProfit._1,
-        todayInverse(mostProfitableCurrencyAndProfit._1) / pastInverse(mostProfitableCurrencyAndProfit._1) - 1
-      )
+      mostProfitableCurrency -> (todayInverse(mostProfitableCurrency) / pastInverse(mostProfitableCurrency) - 1)
     }
   }
 

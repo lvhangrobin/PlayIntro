@@ -30,7 +30,7 @@ class ThrottlingFilter @Inject()(
   override def apply(nextFilter: RequestHeader => Future[Result])
            (requestHeader: RequestHeader): Future[Result] = {
 
-    val maxRequests = configuration.getInt("play.application.maxRequests").getOrElse(3)
+    val maxRequests = configuration.getInt("play.application.maxRequests").getOrElse(100)
     val apiKey: String = requestHeader.headers.get("api-key").getOrElse(requestHeader.remoteAddress)
     val now = DateTime.now()
 
